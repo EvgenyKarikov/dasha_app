@@ -1,8 +1,8 @@
 import socket
 import struct
 import msgpack
-import threading
-import multiprocessing
+import multiprocessing as mp
+from multiprocessing import Queue, Process
 import queue
 import requests
 import numpy as np
@@ -304,24 +304,28 @@ class ProfiTalkClient:
         data = self.convert_dump_bin_to_np(r.content)
         return data
 
-    def get_profiles_stream(self, buffered: bool = True):
+    def get_profiles_stream(self, buffered: bool = True, q: Queue = None):
         """
         Get profiles stream as a generator.
 
         :param buffered: Use queue for buffering.
         :yield: Profile dictionaries.
         """
-        q = queue.Queue()
-        thread = threading.Thread(target=self._stream_reader, args=(self.profiles_port, q), daemon=True)
+        
+        thread = Process(
+            target=self._stream_reader,
+            args=(self.profiles_port, q),
+            daemon=True
+        )
         thread.start()
         while True:
             yield q.get()
             
     def collect_profiles_stream(self, num_profiles: Optional[int] = None, buffered: bool = True):
         profiles = []
-        q = multiprocessing.Queue()
+        q = Queue()
         # thread = threading.Thread(target=self._stream_reader, args=(self.profiles_port, q), daemon=True)
-        thread = multiprocessing.Process(
+        thread = Process(
             target=self._stream_reader,
             args=(self.profiles_port, q),
             daemon=True
@@ -347,8 +351,8 @@ class ProfiTalkClient:
         :param buffered: Use queue for buffering.
         :yield: Video frame dictionaries.
         """
-        q = queue.Queue()
-        thread = threading.Thread(target=self._stream_reader, args=(self.video_port, q), daemon=True)
+        q =Queue()
+        thread = Process(target=self._stream_reader, args=(self.video_port, q), daemon=True)
         thread.start()
         if send_period_ms is not None:
             # Send period command, but manual says for video stream, send inside the connection?
