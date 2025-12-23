@@ -1,2 +1,3 @@
 conf:
   command_listen_port: 7930
+  yolo_weights_path: 'weights\best0.pt'
