@@ -351,7 +351,7 @@ class ProfiTalkClient:
         :param buffered: Use queue for buffering.
         :yield: Video frame dictionaries.
         """
-        q =Queue()
+        q = Queue()
         thread = Process(target=self._stream_reader, args=(self.video_port, q), daemon=True)
         thread.start()
         if send_period_ms is not None:

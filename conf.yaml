@@ -1,3 +1,6 @@
 conf:
   command_listen_port: 7930
   yolo_weights_path: 'weights\best0.pt'
+  profiler_type: 'rf627'
+  rf627:
+    addr: '192.168.20.50'
